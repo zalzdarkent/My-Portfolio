@@ -50,7 +50,7 @@
     "filter": {
       "all": "All",
       "web": "Web App",
-      "mobile": "Mobile",
+      "iot": "IoT",
       "ai": "AI / ML",
       "fullstack": "Full Stack"
     },
