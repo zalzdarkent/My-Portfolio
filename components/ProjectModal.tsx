@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Project } from "@/lib/data";
 import { FaDocker, FaLaravel, FaPython, FaReact, FaPhp } from "react-icons/fa6";
-import { SiInertia, SiMysql, SiOpencv, SiShadcnui, SiTailwindcss, SiYolo, SiFlask, SiOnnx, SiVite, SiBootstrap, SiJquery, SiJavascript } from "react-icons/si";
+import { SiInertia, SiMysql, SiOpencv, SiShadcnui, SiTailwindcss, SiYolo, SiFlask, SiOnnx, SiVite, SiBootstrap, SiJquery, SiJavascript, SiPostgresql } from "react-icons/si";
 import { useTranslations } from "next-intl";
 import { DiMsqlServer } from "react-icons/di";
 
@@ -36,7 +36,8 @@ const techIconMap: Record<string, { icon: any; bg: string; text: string }> = {
   "Flask": { icon: SiFlask, bg: "#000000", text: "#FFFFFF" },
   "ONNX": { icon: SiOnnx, bg: "#005CED", text: "#FFFFFF" },
 
-  // mobile
+  // iot
+  "postgreSQL": { icon: SiPostgresql, bg: "#336791", text: "#FFFFFF" },
 };
 
 export default function ProjectModal({ project, onClose }: ProjectModalProps) {

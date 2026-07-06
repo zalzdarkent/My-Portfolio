@@ -71,6 +71,14 @@ export const PROJECTS: Project[] = [
     github: "", 
     live: "",
   },
+  {
+    id: 6,
+    tags: ["web", "iot"],
+    image: "/projects/grinding-monitoring.png",
+    tech: ["PHP", "postgreSQL", "SQLSRV", "Bootstrap", "Jquery", "Javascript"],
+    github: "", 
+    live: "",
+  },
 ];
 
 export const NAV_LINKS = [

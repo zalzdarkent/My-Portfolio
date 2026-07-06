@@ -117,6 +117,17 @@
           "Search & Filter by Location or IP",
           "Excel/PDF Reporting for Audit"
         ]
+      },
+      "6": {
+        "name": "Grinding Machine Monitoring",
+        "shortDesc": "Web-IoT-based monitoring system for grinding machines.",
+        "longDesc": "The Grinding Machine Monitoring System is a web-based application built to manage and monitor the status of grinding machines across an organization. The system helps prevent equipment downtime, tracks machine performance, and ensures accurate data management. Built with PHP and SQLSRV for reliable database integration.",
+        "features": [
+          "Machine Status Management & Monitoring",
+          "Performance Tracking & Analysis",
+          "Alerts & Notifications for Maintenance",
+          "Search & Filter by line or Location and range date"
+        ]
       }
     }
   },

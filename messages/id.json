@@ -113,6 +113,17 @@
           "Pencarian & Filter berdasarkan Lokasi atau IP",
           "Pelaporan Excel/PDF untuk Audit"
         ]
+      },
+      "6": {
+        "name": "Monitoring Mesin Grinding",
+        "shortDesc": "Sistem monitoring mesin grinding berbasis Web-IoT.",
+        "longDesc": "Sistem Monitoring Mesin Grinding adalah aplikasi berbasis web yang dibangun untuk mengelola dan memonitor status mesin grinding di seluruh organisasi. Sistem ini membantu mencegah downtime peralatan, melacak kinerja mesin, dan memastikan manajemen data yang akurat. Dibangun dengan PHP dan SQLSRV untuk integrasi database yang handal.",
+        "features": [
+          "Manajemen & Monitoring Status Mesin",
+          "Pelacakan & Analisis Kinerja",
+          "Peringatan & Notifikasi untuk Pemeliharaan",
+          "Pencarian & Filter berdasarkan Line dan rentang waktu"
+        ]
       }
     },
     "modal": {
