@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { useInView, motion, animate, useMotionValue, useTransform } from "framer-motion";
 import { FolderKanban, Handshake, GitBranch } from "lucide-react";
 import { BiBriefcaseAlt } from "react-icons/bi";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 function Counter({
   value,
@@ -35,6 +35,7 @@ function Counter({
 
 export default function AboutSection() {
   const t = useTranslations("about");
+  const locale = useLocale();
   const STATS = [
     {
       num: 3,
@@ -88,8 +89,15 @@ export default function AboutSection() {
       }
     }, 600);
 
+    const fileMap: Record<string, string> = {
+      id: "/resume/CV_ID_Alif_Fadillah_Ummar.pdf",
+      en: "/resume/CV_ENG_Alif_Fadillah_Ummar.pdf",
+    };
+
+    const filePath = fileMap[locale] ?? fileMap.en; 
+
     try {
-      const response = await fetch("/resume/CV_ENG_Alif_Fadillah_Ummar.pdf");
+      const response = await fetch(filePath);
       if (!response.ok) throw new Error("File tidak ditemukan");
 
       const blob = await response.blob();
@@ -98,7 +106,7 @@ export default function AboutSection() {
       const tempLink = document.createElement("a");
       tempLink.href = url;
 
-      const fileName = "/resume/CV_ENG_Alif_Fadillah_Ummar.pdf".split("/").pop();
+      const fileName = filePath.split("/").pop();
       if (fileName) tempLink.download = fileName;
 
       document.body.appendChild(tempLink);
