@@ -5,6 +5,7 @@ import { useInView, motion, animate, useMotionValue, useTransform } from "framer
 import { FolderKanban, Handshake, GitBranch } from "lucide-react";
 import { BiBriefcaseAlt } from "react-icons/bi";
 import { useTranslations, useLocale } from "next-intl";
+import CvModal from "@/components/CvModal";
 
 function Counter({
   value,
@@ -72,64 +73,15 @@ export default function AboutSection() {
   ];
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
-  const [downloadStatus, setDownloadStatus] = useState<"idle" | "loading" | "done">("idle");
-  const [loadingText, setLoadingText] = useState("GETTING FILE...");
+  const [cvModalOpen, setCvModalOpen] = useState(false);
 
-  const handleDownload = async () => {
-    if (downloadStatus === "loading") return;
-
-    setDownloadStatus("loading");
-
-    const texts = ["FETCHING CV...", "INJECTING STYLE...", "COMPRESSING BULK..."];
-    let textIndex = 0;
-    const interval = setInterval(() => {
-      if (textIndex < texts.length) {
-        setLoadingText(texts[textIndex]);
-        textIndex++;
-      }
-    }, 600);
-
-    const fileMap: Record<string, string> = {
-      id: "/resume/CV_ID_Alif_Fadillah_Ummar.pdf",
-      en: "/resume/CV_ENG_Alif_Fadillah_Ummar.pdf",
-    };
-
-    const filePath = fileMap[locale] ?? fileMap.en; 
-
-    try {
-      const response = await fetch(filePath);
-      if (!response.ok) throw new Error("File tidak ditemukan");
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-
-      const tempLink = document.createElement("a");
-      tempLink.href = url;
-
-      const fileName = filePath.split("/").pop();
-      if (fileName) tempLink.download = fileName;
-
-      document.body.appendChild(tempLink);
-      tempLink.click();
-
-      document.body.removeChild(tempLink);
-      window.URL.revokeObjectURL(url);
-
-      clearInterval(interval);
-      setDownloadStatus("done");
-
-      setTimeout(() => {
-        setDownloadStatus("idle");
-        setLoadingText("GETTING FILE...");
-      }, 2000);
-
-    } catch (error) {
-      console.error(error);
-      clearInterval(interval);
-      setLoadingText("ERROR FETCHING!");
-      setTimeout(() => setDownloadStatus("idle"), 2000);
-    }
+  const fileMap: Record<string, string> = {
+    id: "/resume/CV_ID_Alif_Fadillah_Ummar.pdf",
+    en: "/resume/CV_ENG_Alif_Fadillah_Ummar.pdf",
   };
+
+  const cvUrl = fileMap[locale] ?? fileMap.en;
+  const cvFileName = cvUrl.split("/").pop() ?? "CV.pdf";
 
   return (
     <section
@@ -158,21 +110,20 @@ export default function AboutSection() {
           ))}
 
           <button
-            onClick={handleDownload}
-            disabled={downloadStatus === "loading"}
-            className={`inline-flex items-center gap-2 mt-4 px-7 py-3.5 border-4 border-brutal-black shadow-brutal font-body font-bold text-sm uppercase tracking-widest transition-all duration-100 cursor-pointer disabled:cursor-not-allowed
-        ${downloadStatus === "idle"
-                ? "bg-brutal-yellow text-brutal-black hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-brutal-hover active:translate-x-[6px] active:translate-y-[6px] active:shadow-none"
-                : downloadStatus === "loading"
-                  ? "bg-brutal-orange text-white translate-x-[3px] translate-y-[3px] shadow-brutal-hover animate-pulse" // Efek kaku berkedip pas loading
-                  : "bg-brutal-lime text-brutal-black translate-x-[6px] translate-y-[6px] shadow-none" // Amblas rata tanah pas sukses
-              }
-      `}
+            onClick={() => setCvModalOpen(true)}
+            className="inline-flex items-center gap-2 mt-4 px-7 py-3.5 border-4 border-brutal-black shadow-brutal font-body font-bold text-sm uppercase tracking-widest bg-brutal-yellow text-brutal-black hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-brutal-hover active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all duration-100 cursor-pointer"
           >
-            {downloadStatus === "idle" && "Download CV →"}
-            {downloadStatus === "loading" && `⚡ ${loadingText}`}
-            {downloadStatus === "done" && "✦ SUCCESS DOWNLOADING! ✦"}
+            {t("btn")}
           </button>
+
+          <CvModal
+            isOpen={cvModalOpen}
+            onClose={() => setCvModalOpen(false)}
+            pdfUrl={cvUrl}
+            fileName={cvFileName}
+            title={t("cvModal.title")}
+            downloadText={t("cvModal.download")}
+          />
         </motion.div>
 
         {/* Stats */}

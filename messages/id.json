@@ -24,7 +24,11 @@
   "about": {
     "title": "TENTANG SAYA",
     "desc": "Saya adalah seorang Full Stack Developer dengan pengalaman lebih dari 3 tahun dalam membangun aplikasi web yang inovatif dan efisien. Keahlian saya meliputi Laravel, React, Next.js, CodeIgniter, dan Node.js. Saya memiliki rekam jejak yang terbukti dalam mengembangkan solusi digital yang berdampak, bekerja sama dengan tim lintas fungsi untuk mencapai hasil yang luar biasa.",
-    "btn": "Unduh CV",
+    "btn": "Lihat CV",
+    "cvModal": {
+      "title": "CURRICULUM VITAE",
+      "download": "⬇ Unduh"
+    },
     "stats": {
       "experiences": "Tahun Pengalaman",
       "projects": "Proyek Selesai",

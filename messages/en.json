@@ -24,7 +24,11 @@
   "about": {
     "title": "ABOUT ME",
     "desc": "I am a Full Stack Developer with over 3 years of experience in building innovative and efficient web applications. My expertise includes Laravel, React, Next.js, CodeIgniter, and Node.js. I have a proven track record of developing impactful digital solutions, collaborating with cross-functional teams to achieve outstanding results.",
-    "btn": "Download CV",
+    "btn": "View CV",
+    "cvModal": {
+      "title": "CURRICULUM VITAE",
+      "download": "⬇ Download"
+    },
     "stats": {
       "experiences": "Years Experience",
       "projects": "Projects Completed",
