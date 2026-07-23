@@ -9,6 +9,10 @@ export interface Project {
   tech: string[];
   github: string;
   live: string;
+  name?: string;
+  shortDesc?: string;
+  longDesc?: string;
+  features?: string[];
 }
 
 export interface Tech {

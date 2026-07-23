@@ -6,7 +6,21 @@ import { SiNextdotjs, SiCodeigniter } from "react-icons/si";
 import { TypeAnimation } from "react-type-animation";
 import Image from "next/image";
 import { useEffect, useState, useRef } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
+
+interface HeroData {
+  id: number;
+  locale: string;
+  greeting: string;
+  nameLabel: string;
+  description: string;
+  btnProject: string;
+  btnContact: string;
+  status: string;
+  stickerExp: string;
+  stickerOpen: string;
+  availableText: string;
+}
 
 const techStack = [
   { name: "Laravel", Icon: FaLaravel, bg: "#FDE047", text: "#0a0a0a" },
@@ -83,6 +97,7 @@ export function ScrambleText() {
 export default function HeroSection() {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
+  const locale = useLocale();
 
   const rotateX = useSpring(mouseY, {
     stiffness: 120,
@@ -127,7 +142,18 @@ export default function HeroSection() {
   };
 
   const sectionRef = useRef<HTMLElement>(null);
-  const t = useTranslations("hero");
+
+  const [heroData, setHeroData] = useState<HeroData | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/hero")
+      .then((res) => res.json())
+      .then((data: HeroData[]) => {
+        const match = data.find((h) => h.locale === locale);
+        if (match) setHeroData(match);
+      })
+      .catch(() => {});
+  }, [locale]);
 
   return (
     <section
@@ -158,7 +184,7 @@ export default function HeroSection() {
         {/* Badge */}
         <motion.div variants={item} className="mb-6 self-start">
           <span className="inline-block bg-brutal-lime border-3 border-brutal-black shadow-brutal-sm px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest">
-            {t("available")} {/* ← */}
+            {heroData?.availableText ?? "OPEN TO"}
             <ScrambleText />
           </span>
         </motion.div>
@@ -168,9 +194,9 @@ export default function HeroSection() {
           variants={item}
           className="font-display text-[clamp(3rem,8vw,6rem)] font-extrabold leading-[0.93] tracking-tight mb-6"
         >
-          <span className="block">{t("greeting")}</span>
+          <span className="block">{heroData?.greeting ?? "HALO!!"}</span>
           <span className="block">
-            {t("name")}{" "}
+            {heroData?.nameLabel ?? "SAYA"}{" "}
             <span className="inline-block bg-brutal-yellow px-2 border-3 border-brutal-black shadow-brutal -rotate-1">
               ALIF
             </span>
@@ -182,16 +208,16 @@ export default function HeroSection() {
           variants={item}
           className="text-lg leading-relaxed text-black/70 max-w-lg mb-8 font-body"
         >
-          {t("desc")}
+          {heroData?.description ?? "Frontend Developer yang passionate dalam membangun antarmuka web modern, interaktif, dan responsif. Berpengalaman dalam React, Next.js, dan Tailwind CSS."}
         </motion.p>
 
         {/* Buttons */}
         <motion.div variants={item} className="flex flex-col sm:flex-row gap-3">
           <BrutalBtn href="#portfolio" variant="yellow">
-            {t("btnProject")}
+            {heroData?.btnProject ?? "Lihat Proyek"}
           </BrutalBtn>
           <BrutalBtn href="#contact" variant="dark">
-            {t("btnContact")}
+            {heroData?.btnContact ?? "Hubungi Saya"}
           </BrutalBtn>
         </motion.div>
       </motion.div>
@@ -213,10 +239,10 @@ export default function HeroSection() {
         />
         {/* Decorative stickers */}
         <Sticker className="top-[15%] right-[6%] rotate-[8deg] bg-brutal-orange text-white">
-          {t("sticker.exp")} {/* ← */}
+          {heroData?.stickerExp ?? "3+ Y.O.E"}
         </Sticker>
         <Sticker className="bottom-[12%] left-[4%] -rotate-[5deg] bg-brutal-pink text-white">
-          {t("sticker.open")}
+          {heroData?.stickerOpen ?? "OPEN TO WORK"}
         </Sticker>
 
         {/* Floating code tags */}
@@ -276,12 +302,11 @@ export default function HeroSection() {
               <div className="absolute inset-0 rounded-full bg-brutal-white border-4 border-brutal-black overflow-hidden flex items-center justify-center transition-transform group-hover:translate-x-[2px] group-hover:translate-y-[2px]">
 
                 <Image
-                  src="/profile/alif.jpeg" // 💡 Taruh file foto kamu di dalam folder 'public' dengan nama ini
+                  src="/profile/alif.jpeg"
                   alt="Alif Fadillah Umar"
-                  width={112} // Sesuaikan dengan ukuran w-28 (28 * 4 = 112px)
+                  width={112}
                   height={112}
                   className="w-full h-full object-cover grayscale contrast-125 transition-all duration-300 group-hover:grayscale-0"
-                // 💡 Efek Brutalist: Foto auto-hitam-putih tajam, pas di-hover berubah jadi berwarna!
                 />
 
               </div>
@@ -311,7 +336,7 @@ export default function HeroSection() {
             {/* Status */}
             <div className="flex items-center gap-2 border-3 border-brutal-black shadow-brutal-sm bg-brutal-lime px-3 py-1.5">
               <span className="w-2.5 h-2.5 rounded-full bg-green-600 animate-pulse-dot" />
-              <span className="font-body font-bold text-xs">{t("status")}</span>
+              <span className="font-body font-bold text-xs">{heroData?.status ?? "Tersedia untuk kerja"}</span>
             </div>
 
             {/* Tech badges */}

@@ -1,27 +1,75 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useInView, motion } from "framer-motion";
 import { SectionHeader } from "./AboutSection";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 const ACCENTS = ["#BFFF00", "#00ff37", "#FF6B35"];
 const ACHIEVEMENT_COLORS = ["bg-brutal-lime", "bg-brutal-yellow", "bg-brutal-orange", "bg-brutal-pink"];
 
+type EducationItem = {
+  id: string;
+  locale: string;
+  title: string;
+  place: string;
+  period: string;
+  sortOrder: number;
+  highlights: { id: string; text: string; sortOrder: number }[];
+};
+
+type SidebarData = {
+  competencies: { id: string; k: string; v: string }[];
+  achievements: { id: string; text: string; sortOrder: number }[];
+};
+
 export default function EducationSection() {
   const t = useTranslations("education");
+  const locale = useLocale();
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
-  const eduList = t.raw("list") as {
+  const defaultEduList = t.raw("list") as {
     title: string;
     place: string;
     period: string;
     highlights: string[];
   }[];
 
-  const competencies = t.raw("competencies.items") as { k: string; v: string }[];
-  const achievements = t.raw("achievements.items") as string[];
+  const defaultCompetencies = t.raw("competencies.items") as { k: string; v: string }[];
+  const defaultAchievements = t.raw("achievements.items") as string[];
+
+  const [eduList, setEduList] = useState(defaultEduList);
+  const [competencies, setCompetencies] = useState(defaultCompetencies);
+  const [achievements, setAchievements] = useState(defaultAchievements);
+
+  useEffect(() => {
+    fetch("/api/admin/education")
+      .then((res) => res.json())
+      .then((data: EducationItem[]) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const filtered = data
+            .filter((e) => e.locale === locale)
+            .sort((a, b) => a.sortOrder - b.sortOrder)
+            .map((e) => ({
+              title: e.title,
+              place: e.place,
+              period: e.period,
+              highlights: e.highlights.sort((a, b) => a.sortOrder - b.sortOrder).map((h) => h.text),
+            }));
+          if (filtered.length > 0) setEduList(filtered);
+        }
+      })
+      .catch(() => {});
+
+    fetch("/api/admin/sidebar")
+      .then((res) => res.json())
+      .then((data: SidebarData) => {
+        if (data.competencies?.length > 0) setCompetencies(data.competencies.map((c) => ({ k: c.k, v: c.v })));
+        if (data.achievements?.length > 0) setAchievements(data.achievements.sort((a, b) => a.sortOrder - b.sortOrder).map((a) => a.text));
+      })
+      .catch(() => {});
+  }, [locale]);
 
   return (
     <section
@@ -56,7 +104,7 @@ export default function EducationSection() {
                 </div>
                 <span
                   className="font-mono text-[10px] font-bold uppercase tracking-widest px-2 py-1 border-2 border-brutal-black"
-                  style={{ background: ACCENTS[idx], color: "#0a0a0a" }}
+                  style={{ background: ACCENTS[idx % ACCENTS.length], color: "#0a0a0a" }}
                 >
                   {edu.period}
                 </span>
@@ -104,7 +152,7 @@ export default function EducationSection() {
                 {achievements.map((text, index) => (
                   <div
                     key={index}
-                    className={`flex items-center justify-between gap-4 border-3 border-brutal-black ${ACHIEVEMENT_COLORS[index]} shadow-brutal-sm p-3`}
+                    className={`flex items-center justify-between gap-4 border-3 border-brutal-black ${ACHIEVEMENT_COLORS[index % ACHIEVEMENT_COLORS.length]} shadow-brutal-sm p-3`}
                     style={{ boxShadow: "6px 6px 0px #0a0a0a" }}
                   >
                     <p className="font-body font-bold text-sm">{text}</p>

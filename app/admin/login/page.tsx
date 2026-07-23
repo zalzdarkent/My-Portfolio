@@ -13,29 +13,38 @@ function AdminLoginInner() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
-      // Demo auth: just check for non-empty.
-      // You can replace with real auth later.
       if (!username.trim() || !password.trim()) {
         setError("Username / password harus diisi.");
+        setLoading(false);
         return;
       }
 
-      // Create cookie on client side.
-      document.cookie = `admin_auth=1; path=/admin; max-age=${60 * 60 * 24}; samesite=lax`;
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: username.trim(), password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Login gagal.");
+        setLoading(false);
+        return;
+      }
 
       router.push(from);
-    } finally {
+    } catch {
+      setError("Terjadi kesalahan jaringan.");
       setLoading(false);
     }
   };
-
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 py-20">
@@ -64,7 +73,7 @@ function AdminLoginInner() {
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="mt-2 w-full px-4 py-3 border-3 border-brutal-black bg-brutal-white font-body font-bold text-sm outline-none focus:translate-x-[2px] focus:translate-y-[2px] focus:shadow-brutal-hover"
-                placeholder="misal: alif"
+                placeholder="Masukkan username..."
               />
             </label>
 
@@ -99,10 +108,6 @@ function AdminLoginInner() {
               {loading ? "⚡ Checking..." : "Login →"}
             </button>
           </form>
-
-          <div className="mt-6 text-xs font-body text-black/60">
-            Demo auth: isi field apa pun yang tidak kosong.
-          </div>
         </div>
       </div>
     </div>
@@ -116,5 +121,3 @@ export default function AdminLoginPage() {
     </Suspense>
   );
 }
-
-

@@ -7,6 +7,16 @@ import { BiBriefcaseAlt } from "react-icons/bi";
 import { useTranslations, useLocale } from "next-intl";
 import CvModal from "@/components/CvModal";
 
+interface AboutData {
+  id: number;
+  locale: string;
+  title: string;
+  description: string;
+  btnLabel: string;
+  cvModalTitle: string;
+  cvModalDownload: string;
+}
+
 function Counter({
   value,
   inView,
@@ -37,6 +47,18 @@ function Counter({
 export default function AboutSection() {
   const t = useTranslations("about");
   const locale = useLocale();
+  const [aboutData, setAboutData] = useState<AboutData | null>(null);
+
+  useEffect(() => {
+    fetch("/api/admin/about")
+      .then((res) => res.json())
+      .then((data: AboutData[]) => {
+        const match = data.find((a) => a.locale === locale);
+        if (match) setAboutData(match);
+      })
+      .catch(() => {});
+  }, [locale]);
+
   const STATS = [
     {
       num: 3,
@@ -90,7 +112,7 @@ export default function AboutSection() {
       className="relative overflow-hidden px-6 sm:px-10 lg:px-14 py-20 border-b-4 border-brutal-black"
     >
       {/* Section header */}
-      <SectionHeader num="01" title={t("title")} inView={inView} />
+      <SectionHeader num="01" title={aboutData?.title ?? "TENTANG SAYA"} inView={inView} />
 
       {/* Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 mt-10">
@@ -101,19 +123,15 @@ export default function AboutSection() {
           transition={{ duration: 0.55, delay: 0.1 }}
           className="space-y-5"
         >
-          {[
-            t("desc")
-          ].map((p, i) => (
-            <p key={i} className="font-body text-lg leading-relaxed text-black/70">
-              {p}
-            </p>
-          ))}
+          <p className="font-body text-lg leading-relaxed text-black/70">
+            {aboutData?.description ?? "Saya adalah seorang developer yang antusias dalam membangun solusi digital yang inovatif dan bermakna. Dengan pengalaman dalam berbagai proyek, saya terus berusaha untuk memberikan yang terbaik dalam setiap tugas yang saya kerjakan."}
+          </p>
 
           <button
             onClick={() => setCvModalOpen(true)}
             className="inline-flex items-center gap-2 mt-4 px-7 py-3.5 border-4 border-brutal-black shadow-brutal font-body font-bold text-sm uppercase tracking-widest bg-brutal-yellow text-brutal-black hover:translate-x-[3px] hover:translate-y-[3px] hover:shadow-brutal-hover active:translate-x-[6px] active:translate-y-[6px] active:shadow-none transition-all duration-100 cursor-pointer"
           >
-            {t("btn")}
+            {aboutData?.btnLabel ?? "Lihat CV"}
           </button>
 
           <CvModal
@@ -121,8 +139,8 @@ export default function AboutSection() {
             onClose={() => setCvModalOpen(false)}
             pdfUrl={cvUrl}
             fileName={cvFileName}
-            title={t("cvModal.title")}
-            downloadText={t("cvModal.download")}
+            title={aboutData?.cvModalTitle ?? "CURRICULUM VITAE"}
+            downloadText={aboutData?.cvModalDownload ?? "⬇ Unduh"}
           />
         </motion.div>
 

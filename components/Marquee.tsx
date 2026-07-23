@@ -1,4 +1,8 @@
-const ITEMS = [
+"use client";
+
+import { useEffect, useState } from "react";
+
+const DEFAULT_ITEMS = [
   "Full Stack Development",
   "UI/UX Design",
   "API Integration",
@@ -7,8 +11,23 @@ const ITEMS = [
   "Mobile Responsive",
 ];
 
+type MarqueeItem = { id: string; text: string; sortOrder: number };
+
 export default function Marquee() {
-  const doubled = [...ITEMS, ...ITEMS];
+  const [items, setItems] = useState(DEFAULT_ITEMS);
+
+  useEffect(() => {
+    fetch("/api/admin/marquee")
+      .then((res) => res.json())
+      .then((data: MarqueeItem[]) => {
+        if (Array.isArray(data) && data.length > 0) {
+          setItems(data.sort((a, b) => a.sortOrder - b.sortOrder).map((d) => d.text));
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const doubled = [...items, ...items];
 
   return (
     <div className="bg-brutal-black border-b-4 border-brutal-black overflow-hidden py-3">

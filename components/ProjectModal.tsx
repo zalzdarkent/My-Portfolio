@@ -42,7 +42,6 @@ const techIconMap: Record<string, { icon: any; bg: string; text: string }> = {
 
 export default function ProjectModal({ project, onClose }: ProjectModalProps) {
   const t = useTranslations("projects");
-  const id = project ? String(project.id) : null;
   // Lock scroll
   useEffect(() => {
     if (project) {
@@ -90,7 +89,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                 <p className="font-mono text-xs font-bold uppercase tracking-widest mb-1 opacity-60">
                   {project.tags.join(" · ")}
                 </p>
-                <h3 className="font-display text-2xl font-extrabold">{t(`projects.${id}.name`)}</h3>
+                <h3 className="font-display text-2xl font-extrabold">{project.name || `Project ${project.id}`}</h3>
               </div>
               <button
                 onClick={onClose}
@@ -105,11 +104,11 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
               {/* Project Image */}
               {project.image && (
                 <div className="relative w-full aspect-video border-3 border-brutal-black shadow-brutal-sm overflow-hidden">
-                  <img src={project.image} alt={t(`projects.${id}.name`)} className="w-full h-full object-cover" />
+                  <img src={project.image} alt={project.name || `Project ${project.id}`} className="w-full h-full object-cover" />
                 </div>
               )}
 
-              <p className="font-body text-base leading-relaxed text-black/70">{t(`projects.${id}.longDesc`)}</p>
+              <p className="font-body text-base leading-relaxed text-black/70">{project.longDesc || ""}</p>
 
               {/* Tech */}
               <div>
@@ -201,7 +200,7 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                   {t("modal.featuresLabel")}
                 </p>
                 <ul className="space-y-2">
-                  {(t.raw(`projects.${id}.features`) as string[]).map((f, i) => ( // ← t.raw untuk array
+                  {(project.features ?? []).map((f, i) => (
                     <li key={i} className="flex items-start gap-2 font-body text-sm">
                       <span className="text-brutal-orange font-bold mt-0.5">✦</span>
                       {f}

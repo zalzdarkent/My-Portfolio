@@ -16,6 +16,7 @@ yarn-error.log*
 pnpm-debug.log*
 
 # Local environment variables (SANGAT PENTING: biar API Key / DB password ga bocor ke GitHub)
+.env
 .env*.local
 
 # Vercel deployment artifacts
@@ -37,3 +38,4 @@ next-env.d.ts
 # OS generated files
 .DS_Store
 Thumbs.db
+/lib/generated/prisma

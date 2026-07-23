@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useInView, motion } from "framer-motion";
 import Image from "next/image";
 import { SectionHeader } from "./AboutSection";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
 const LOGOS = [
   "/brands/gdsc.png",
@@ -14,20 +14,69 @@ const LOGOS = [
 ];
 const ACCENTS = ["#BFFF00", "#FDE047", "#35ffff", "#FF6B35"];
 
+type ExperienceItem = {
+  id: string;
+  locale: string;
+  role: string;
+  place: string;
+  period: string;
+  sortOrder: number;
+  logoPath: string;
+  items: { id: string; text: string; sortOrder: number }[];
+};
+
+type SidebarData = {
+  workHabits: { id: string; k: string; v: string }[];
+  snapshotItems: { id: string; num: string; label: string }[];
+};
+
 export default function ExperienceSection() {
   const t = useTranslations("experience");
+  const locale = useLocale();
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
 
-  const expList = t.raw("list") as {
+  const defaultExpList = t.raw("list") as {
     role: string;
     place: string;
     period: string;
     items: string[];
   }[];
 
-  const workHabits = t.raw("workHabits.items") as { k: string; v: string }[];
-  const snapshotItems = t.raw("snapshot.items") as { num: string; label: string }[];
+  const defaultWorkHabits = t.raw("workHabits.items") as { k: string; v: string }[];
+  const defaultSnapshotItems = t.raw("snapshot.items") as { num: string; label: string }[];
+
+  const [expList, setExpList] = useState(defaultExpList);
+  const [workHabits, setWorkHabits] = useState(defaultWorkHabits);
+  const [snapshotItems, setSnapshotItems] = useState(defaultSnapshotItems);
+
+  useEffect(() => {
+    fetch("/api/admin/experiences")
+      .then((res) => res.json())
+      .then((data: ExperienceItem[]) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const filtered = data
+            .filter((e) => e.locale === locale)
+            .sort((a, b) => a.sortOrder - b.sortOrder)
+            .map((e) => ({
+              role: e.role,
+              place: e.place,
+              period: e.period,
+              items: e.items.sort((a, b) => a.sortOrder - b.sortOrder).map((it) => it.text),
+            }));
+          if (filtered.length > 0) setExpList(filtered);
+        }
+      })
+      .catch(() => {});
+
+    fetch("/api/admin/sidebar")
+      .then((res) => res.json())
+      .then((data: SidebarData) => {
+        if (data.workHabits?.length > 0) setWorkHabits(data.workHabits.map((w) => ({ k: w.k, v: w.v })));
+        if (data.snapshotItems?.length > 0) setSnapshotItems(data.snapshotItems.map((s) => ({ num: s.num, label: s.label })));
+      })
+      .catch(() => {});
+  }, [locale]);
 
   return (
     <section
@@ -76,7 +125,7 @@ export default function ExperienceSection() {
                       <div className="flex items-start gap-3">
                         <span className="w-10 h-10 flex items-center justify-center border-4 border-brutal-black shadow-brutal-sm">
                           <Image
-                            src={LOGOS[idx]}
+                            src={LOGOS[idx % LOGOS.length]}
                             alt={`${exp.role} logo`}
                             width={40}
                             height={40}
@@ -90,7 +139,7 @@ export default function ExperienceSection() {
                       </div>
                       <span
                         className="font-mono text-[10px] font-bold uppercase tracking-widest px-2 py-1 border-2 border-brutal-black"
-                        style={{ background: ACCENTS[idx], color: "#0a0a0a" }}
+                        style={{ background: ACCENTS[idx % ACCENTS.length], color: "#0a0a0a" }}
                       >
                         {exp.period}
                       </span>

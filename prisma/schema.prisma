@@ -1,0 +1,276 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── Auth ────────────────────────────────────────────────────────────────────
+
+model User {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String   @map("password_hash")
+  displayName  String?  @map("display_name")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+// ─── Hero Section ────────────────────────────────────────────────────────────
+
+model HeroContent {
+  id           Int    @id @default(autoincrement())
+  locale       String
+  greeting     String @default("")
+  nameLabel    String @default("") @map("name_label")
+  description  String @default("")
+  btnProject   String @default("") @map("btn_project")
+  btnContact   String @default("") @map("btn_contact")
+  status       String @default("")
+  stickerExp   String @default("") @map("sticker_exp")
+  stickerOpen  String @default("") @map("sticker_open")
+  availableText String @default("") @map("available_text")
+
+  @@unique([locale])
+  @@map("hero_content")
+}
+
+// ─── About Section ───────────────────────────────────────────────────────────
+
+model AboutContent {
+  id          Int    @id @default(autoincrement())
+  locale      String
+  title       String @default("")
+  description String @default("")
+  btnLabel    String @default("") @map("btn_label")
+  cvModalTitle String @default("") @map("cv_modal_title")
+  cvModalDownload String @default("") @map("cv_modal_download")
+
+  @@unique([locale])
+  @@map("about_content")
+}
+
+// ─── Projects ────────────────────────────────────────────────────────────────
+
+model Project {
+  id        Int      @id @default(autoincrement())
+  image     String   @default("")
+  githubUrl String   @default("") @map("github_url")
+  liveUrl   String   @default("") @map("live_url")
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  translations ProjectTranslation[]
+  tags         ProjectTag[]
+  techStack    ProjectTech[]
+
+  @@map("projects")
+}
+
+model ProjectTranslation {
+  id        Int    @id @default(autoincrement())
+  projectId Int    @map("project_id")
+  locale     String
+  name      String @default("")
+  shortDesc String @default("") @map("short_desc")
+  longDesc  String @default("") @map("long_desc")
+  features  String @default("[]") // JSON array stored as string
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, locale])
+  @@map("project_translations")
+}
+
+model ProjectTag {
+  id        Int    @id @default(autoincrement())
+  projectId Int    @map("project_id")
+  tag       String
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("project_tags")
+}
+
+model ProjectTech {
+  id        Int    @id @default(autoincrement())
+  projectId Int    @map("project_id")
+  techName  String @map("tech_name")
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("project_tech")
+}
+
+// ─── Tech Skills ─────────────────────────────────────────────────────────────
+
+model TechSkill {
+  id        Int    @id @default(autoincrement())
+  name      String
+  level     String // Expert, Advanced, Intermediate, Beginner
+  color     String @default("")
+  iconName  String @default("") @map("icon_name")
+  sortOrder Int    @default(0) @map("sort_order")
+
+  @@map("tech_skills")
+}
+
+// ─── Experiences ─────────────────────────────────────────────────────────────
+
+model Experience {
+  id        Int      @id @default(autoincrement())
+  locale    String
+  role      String   @default("")
+  place     String   @default("")
+  period    String   @default("")
+  sortOrder Int      @default(0) @map("sort_order")
+  logoPath  String   @default("") @map("logo_path")
+
+  items ExperienceItem[]
+
+  @@map("experiences")
+}
+
+model ExperienceItem {
+  id           Int    @id @default(autoincrement())
+  experienceId Int    @map("experience_id")
+  text         String @default("")
+  sortOrder    Int    @default(0) @map("sort_order")
+
+  experience Experience @relation(fields: [experienceId], references: [id], onDelete: Cascade)
+
+  @@map("experience_items")
+}
+
+// ─── Education ───────────────────────────────────────────────────────────────
+
+model EducationEntry {
+  id        Int      @id @default(autoincrement())
+  locale    String
+  title     String   @default("")
+  place     String   @default("")
+  period    String   @default("")
+  sortOrder Int      @default(0) @map("sort_order")
+
+  highlights EducationHighlight[]
+
+  @@map("education_entries")
+}
+
+model EducationHighlight {
+  id          Int    @id @default(autoincrement())
+  educationId Int    @map("education_id")
+  text        String @default("")
+  sortOrder   Int    @default(0) @map("sort_order")
+
+  education EducationEntry @relation(fields: [educationId], references: [id], onDelete: Cascade)
+
+  @@map("education_highlights")
+}
+
+// ─── Experience Sidebar Data ─────────────────────────────────────────────────
+
+model WorkHabit {
+  id        Int    @id @default(autoincrement())
+  locale    String
+  k         String @default("")
+  v         String @default("")
+  sortOrder Int    @default(0) @map("sort_order")
+
+  @@map("work_habits")
+}
+
+model SnapshotItem {
+  id        Int    @id @default(autoincrement())
+  locale    String
+  num       String @default("")
+  label     String @default("")
+  sortOrder Int    @default(0) @map("sort_order")
+
+  @@map("snapshot_items")
+}
+
+// ─── Education Sidebar Data ──────────────────────────────────────────────────
+
+model Competency {
+  id        Int    @id @default(autoincrement())
+  locale    String
+  k         String @default("")
+  v         String @default("")
+  sortOrder Int    @default(0) @map("sort_order")
+
+  @@map("competencies")
+}
+
+model Achievement {
+  id        Int    @id @default(autoincrement())
+  locale    String
+  text      String @default("")
+  sortOrder Int    @default(0) @map("sort_order")
+
+  @@map("achievements")
+}
+
+// ─── Contact Section ─────────────────────────────────────────────────────────
+
+model ContactContent {
+  id          Int    @id @default(autoincrement())
+  locale      String
+  title       String @default("")
+  description1 String @default("") @map("description1")
+  description2 String @default("") @map("description2")
+  formName    String @default("") @map("form_name")
+  formEmail   String @default("") @map("form_email")
+  formMessage String @default("") @map("form_message")
+  formPlaceholder String @default("") @map("form_placeholder")
+  formSubmit  String @default("") @map("form_submit")
+  formSubmitting String @default("") @map("form_submitting")
+  toast       String @default("")
+
+  @@unique([locale])
+  @@map("contact_content")
+}
+
+model ContactLink {
+  id        Int    @id @default(autoincrement())
+  iconName  String @default("") @map("icon_name")
+  label     String @default("")
+  href      String @default("")
+  sortOrder Int    @default(0) @map("sort_order")
+
+  @@map("contact_links")
+}
+
+// ─── Marquee ─────────────────────────────────────────────────────────────────
+
+model MarqueeItem {
+  id        Int    @id @default(autoincrement())
+  text      String @default("")
+  sortOrder Int    @default(0) @map("sort_order")
+
+  @@map("marquee_items")
+}
+
+// ─── Footer ──────────────────────────────────────────────────────────────────
+
+model FooterContent {
+  id       Int    @id @default(autoincrement())
+  locale   String
+  copyText String @default("") @map("copy_text")
+
+  @@unique([locale])
+  @@map("footer_content")
+}
+
+// ─── Site Settings ───────────────────────────────────────────────────────────
+
+model SiteSetting {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String @default("")
+
+  @@map("site_settings")
+}

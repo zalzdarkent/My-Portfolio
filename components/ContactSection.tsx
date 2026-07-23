@@ -6,20 +6,28 @@ import { SectionHeader } from "./AboutSection";
 import { FaGithub, FaLinkedin } from "react-icons/fa6";
 import { SiGmail } from "react-icons/si";
 import { useForm, ValidationError } from "@formspree/react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 
-const CONTACT_LINKS = [
-  { icon: <SiGmail />, label: "arszalzdarker@email.com", href: "mailto:arszalzdarker@email.com" },
-  { icon: <FaGithub />, label: "github.com/zalzdarkent", href: "https://github.com/zalzdarkent" },
-  { icon: <FaLinkedin />, label: "linkedin.com/in/alif-fadillah-ummar-07001224b/", href: "https://linkedin.com/in/alif-fadillah-ummar-07001224b/" },
+const ICON_MAP: Record<string, any> = { FaGithub, FaLinkedin, SiGmail };
+
+const DEFAULT_LINKS = [
+  { iconName: "SiGmail", label: "arszalzdarker@email.com", href: "mailto:arszalzdarker@email.com" },
+  { iconName: "FaGithub", label: "github.com/zalzdarkent", href: "https://github.com/zalzdarkent" },
+  { iconName: "FaLinkedin", label: "linkedin.com/in/alif-fadillah-ummar-07001224b/", href: "https://linkedin.com/in/alif-fadillah-ummar-07001224b/" },
 ];
+
+type ContactLink = { id: string; iconName: string; label: string; href: string; sortOrder: number };
+type ContactContent = { id: string; locale: string; title: string; description1: string; description2: string };
+type ContactData = { content: ContactContent[]; links: ContactLink[] };
 
 export default function ContactSection() {
   const t = useTranslations("contact");
+  const locale = useLocale();
   const ref = useRef<HTMLElement>(null);
   const [state, handleSubmit] = useForm("mwvjbojr");
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const [toast, setToast] = useState(false);
+  const [links, setLinks] = useState(DEFAULT_LINKS);
 
   useEffect(() => {
     if (state.succeeded) {
@@ -27,6 +35,17 @@ export default function ContactSection() {
       setTimeout(() => setToast(false), 3500);
     }
   }, [state.succeeded]);
+
+  useEffect(() => {
+    fetch("/api/admin/contact")
+      .then((res) => res.json())
+      .then((data: ContactData) => {
+        if (data.links?.length > 0) {
+          setLinks(data.links.sort((a, b) => a.sortOrder - b.sortOrder));
+        }
+      })
+      .catch(() => {});
+  }, [locale]);
 
   const fields = [
     { label: t("form.name"),  name: "name",  type: "text",  placeholder: "John Doe" },
@@ -54,21 +73,24 @@ export default function ContactSection() {
             <p className="font-body text-base text-black/60">{t("desc2")}</p>
 
             <div className="flex flex-col gap-3">
-              {CONTACT_LINKS.map((link, i) => (
-                <motion.a
-                  key={i}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  whileHover={{ x: 3, y: 3, boxShadow: "1px 1px 0px #0a0a0a" }}
-                  whileTap={{ x: 4, y: 4, boxShadow: "0px 0px 0px #0a0a0a" }}
-                  className="flex items-center gap-3 px-4 py-3 bg-brutal-white border-3 border-brutal-black font-body font-bold text-brutal-black text-sm no-underline"
-                  style={{ boxShadow: "4px 4px 0px #0a0a0a" }}
-                >
-                  <span className="w-7 text-center text-lg">{link.icon}</span>
-                  {link.label}
-                </motion.a>
-              ))}
+              {links.map((link, i) => {
+                const IconComponent = ICON_MAP[link.iconName];
+                return (
+                  <motion.a
+                    key={i}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    whileHover={{ x: 3, y: 3, boxShadow: "1px 1px 0px #0a0a0a" }}
+                    whileTap={{ x: 4, y: 4, boxShadow: "0px 0px 0px #0a0a0a" }}
+                    className="flex items-center gap-3 px-4 py-3 bg-brutal-white border-3 border-brutal-black font-body font-bold text-brutal-black text-sm no-underline"
+                    style={{ boxShadow: "4px 4px 0px #0a0a0a" }}
+                  >
+                    <span className="w-7 text-center text-lg">{IconComponent ? <IconComponent /> : link.iconName}</span>
+                    {link.label}
+                  </motion.a>
+                );
+              })}
             </div>
           </motion.div>
 

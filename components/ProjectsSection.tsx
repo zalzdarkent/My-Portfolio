@@ -1,20 +1,65 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useInView, motion, AnimatePresence } from "framer-motion";
 import { SectionHeader } from "./AboutSection";
 import ProjectModal from "./ProjectModal";
 import { PROJECTS, FILTER_OPTIONS, Project } from "@/lib/data";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+
+interface ApiProject {
+  id: number;
+  image: string;
+  githubUrl: string;
+  liveUrl: string;
+  sortOrder: number;
+  tags: string[];
+  techStack: string[];
+  translations: {
+    locale: string;
+    name: string;
+    shortDesc: string;
+    longDesc: string;
+    features: string[];
+  }[];
+}
 
 export default function ProjectsSection() {
   const t = useTranslations("projects");
+  const locale = useLocale();
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once: true, margin: "-80px" });
   const [activeFilter, setActiveFilter] = useState("all");
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [projects, setProjects] = useState<Project[]>(PROJECTS);
 
-  const filtered = PROJECTS.filter((p) =>
+  useEffect(() => {
+    fetch("/api/admin/projects")
+      .then((res) => res.json())
+      .then((data: ApiProject[]) => {
+        const mapped: Project[] = data
+          .sort((a, b) => a.sortOrder - b.sortOrder)
+          .map((p) => {
+            const tr = p.translations?.find((t) => t.locale === locale);
+            return {
+              id: p.id,
+              tags: p.tags as Project["tags"],
+              image: p.image,
+              tech: p.techStack,
+              github: p.githubUrl,
+              live: p.liveUrl,
+              name: tr?.name ?? "",
+              shortDesc: tr?.shortDesc ?? "",
+              longDesc: tr?.longDesc ?? "",
+              features: tr?.features ?? [],
+            };
+          });
+        setProjects(mapped);
+      })
+      .catch(() => {});
+  }, [locale]);
+
+  const filtered = projects.filter((p) =>
     activeFilter === "all" ? true : p.tags.includes(activeFilter as any)
   );
 
@@ -38,7 +83,7 @@ export default function ProjectsSection() {
               }`}
               style={{ boxShadow: activeFilter === opt.value ? "none" : "4px 4px 0px #0a0a0a" }}
             >
-              {t(`filter.${opt.key}`)} {/* ← */}
+              {t(`filter.${opt.key}`)}
             </motion.button>
           ))}
         </motion.div>
@@ -64,9 +109,6 @@ export default function ProjectsSection() {
 }
 
 function ProjectCard({ project, index, onOpen }: { project: Project; index: number; onOpen: () => void }) {
-  const t = useTranslations("projects");
-  const id = String(project.id);
-
   const TAG_STYLES: Record<string, string> = {
     web: "bg-brutal-yellow",
     fullstack: "bg-brutal-yellow",
@@ -90,7 +132,7 @@ function ProjectCard({ project, index, onOpen }: { project: Project; index: numb
       style={{ boxShadow: "8px 8px 0px #0a0a0a" }}
     >
       <div className="h-44 flex items-center justify-center border-b-4 border-brutal-black relative text-5xl font-bold">
-        <img src={project.image} alt={t(`projects.${id}.name`)} className="w-full h-full object-cover" />
+        <img src={project.image} alt={project.name ?? `Project ${project.id}`} className="w-full h-full object-cover" />
         <span className="absolute top-2 right-2 font-mono text-xs font-bold bg-brutal-black text-brutal-yellow px-2 py-0.5">
           #{String(project.id).padStart(3, "0")}
         </span>
@@ -106,17 +148,17 @@ function ProjectCard({ project, index, onOpen }: { project: Project; index: numb
         </div>
 
         <h3 className="font-display text-lg font-extrabold mb-2">
-          {t(`projects.${id}.name`)} {/* ← */}
+          {project.name || `Project ${project.id}`}
         </h3>
         <p className="font-body text-sm leading-relaxed text-black/60 flex-1 line-clamp-2">
-          {t(`projects.${id}.shortDesc`)} {/* ← */}
+          {project.shortDesc || ""}
         </p>
 
         <button
           onClick={(e) => { e.stopPropagation(); onOpen(); }}
           className="mt-4 self-start px-4 py-2 bg-brutal-black text-brutal-yellow border-3 border-brutal-black shadow-brutal-sm font-body font-bold text-xs uppercase tracking-widest transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
         >
-          {t("detailBtn")} {/* ← */}
+          Detail →
         </button>
       </div>
     </motion.article>
