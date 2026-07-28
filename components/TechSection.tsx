@@ -3,16 +3,17 @@
 import { useEffect, useRef, useState } from "react";
 import { useInView, motion } from "framer-motion";
 import { SectionHeader } from "./AboutSection";
-import { FaLaravel, FaReact, FaNodeJs } from "react-icons/fa";
-import { SiNextdotjs, SiCodeigniter, SiGit, SiTailwindcss, SiTypescript, SiRedis, SiDocker, SiPostgresql, SiMysql } from "react-icons/si";
 import { useTranslations } from "next-intl";
+import { TechIcon } from "@/components/TechIcon";
 
-const ICON_MAP: Record<string, any> = {
-  FaReact, FaLaravel, FaNodeJs, SiNextdotjs, SiCodeigniter, SiGit,
-  SiTailwindcss, SiTypescript, SiRedis, SiDocker, SiPostgresql, SiMysql,
-};
+interface TechItem {
+  name: string;
+  level: string;
+  color: string;
+  iconName: string;
+}
 
-const DEFAULT_TECHS = [
+const DEFAULT_TECHS: TechItem[] = [
   { name: "React", level: "Intermediate", color: "#4fb7fd", iconName: "FaReact" },
   { name: "Next.js", level: "Intermediate", color: "#000000", iconName: "SiNextdotjs" },
   { name: "TypeScript", level: "Intermediate", color: "#2ea8fa", iconName: "SiTypescript" },
@@ -62,7 +63,6 @@ export default function TechSection() {
         className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-10"
       >
         {techs.map((tech, i) => {
-          const IconComponent = tech.icon ? tech.icon : ICON_MAP[tech.iconName];
           return (
             <motion.div
               key={tech.name}
@@ -87,7 +87,7 @@ export default function TechSection() {
                   }
                 }}
               >
-                {IconComponent ? <IconComponent /> : null}
+                <TechIcon name={tech.iconName} />
               </motion.span>
 
               <span className="font-body font-bold text-sm block">{tech.name}</span>

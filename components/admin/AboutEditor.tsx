@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 type AboutLocale = {
   locale: string;
@@ -35,7 +36,6 @@ export default function AboutEditor() {
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     fetch("/api/admin/about")
@@ -63,17 +63,17 @@ export default function AboutEditor() {
 
   const handleSave = async () => {
     setSaving(true);
-    setSaved(false);
     try {
-      await fetch("/api/admin/about", {
+      const res = await fetch("/api/admin/about", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ items: [locales.id, locales.en] }),
       });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      if (!res.ok) throw new Error("Save failed");
+      toast.success("About Section berhasil disimpan!");
     } catch (e) {
       console.error(e);
+      toast.error("Gagal menyimpan About Section!");
     } finally {
       setSaving(false);
     }
@@ -145,11 +145,6 @@ export default function AboutEditor() {
         >
           {saving ? "Saving..." : "Save About"}
         </button>
-        {saved && (
-          <span className="font-mono font-bold text-xs uppercase tracking-widest bg-brutal-lime border-3 border-brutal-black px-3 py-1 animate-pulse">
-            Saved!
-          </span>
-        )}
       </div>
     </div>
   );

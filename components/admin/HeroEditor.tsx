@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 type HeroLocale = {
   locale: string;
@@ -75,17 +76,17 @@ export default function HeroEditor() {
 
   const handleSave = async () => {
     setSaving(true);
-    setSaved(false);
     try {
-      await fetch("/api/admin/hero", {
+      const res = await fetch("/api/admin/hero", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: [locales.id, locales.en] }),
       });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      if (!res.ok) throw new Error("Save failed");
+      toast.success("Hero Section berhasil disimpan!");
     } catch (e) {
       console.error(e);
+      toast.error("Gagal menyimpan Hero Section!");
     } finally {
       setSaving(false);
     }
@@ -139,9 +140,9 @@ export default function HeroEditor() {
         <h2 className="font-display font-extrabold text-xl uppercase tracking-widest">
           Hero Editor
         </h2>
-        <span className="font-mono text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 border-2 border-brutal-black bg-brutal-yellow/30">
+        {/* <span className="font-mono text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 border-2 border-brutal-black bg-brutal-yellow/30">
           /api/admin/hero
-        </span>
+        </span> */}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

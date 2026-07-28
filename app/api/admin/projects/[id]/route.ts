@@ -35,12 +35,23 @@ export async function PUT(
   try {
     const { id } = await params;
     const projectId = Number(id);
-    const { image, githubUrl, liveUrl, sortOrder, translations, tags, tech } = await req.json();
+    const body = await req.json();
+    const { image, images, githubUrl, liveUrl, sortOrder, translations, tags, techStack, tech } = body;
 
     const existing = await prisma.project.findUnique({ where: { id: projectId } });
     if (!existing) {
       return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
+
+    const rawTags = tags ?? [];
+    const parsedTags = rawTags
+      .map((t: any) => (typeof t === "string" ? t : t?.tag))
+      .filter((t: any) => typeof t === "string" && t.trim() !== "");
+
+    const rawTech = techStack ?? tech ?? [];
+    const parsedTech = rawTech
+      .map((t: any) => (typeof t === "string" ? t : t?.techName))
+      .filter((t: any) => typeof t === "string" && t.trim() !== "");
 
     await prisma.$transaction([
       prisma.projectTranslation.deleteMany({ where: { projectId } }),
@@ -52,23 +63,24 @@ export async function PUT(
       where: { id: projectId },
       data: {
         image: image ?? "",
+        images: images ?? "[]",
         githubUrl: githubUrl ?? "",
         liveUrl: liveUrl ?? "",
-        sortOrder: sortOrder ?? 0,
+        sortOrder: Number(sortOrder) || 0,
         translations: {
           create: (translations ?? []).map((t: any) => ({
             locale: t.locale,
             name: t.name ?? "",
             shortDesc: t.shortDesc ?? "",
             longDesc: t.longDesc ?? "",
-            features: t.features ?? "[]",
+            features: typeof t.features === "string" ? t.features : JSON.stringify(t.features ?? []),
           })),
         },
         tags: {
-          create: (tags ?? []).map((tag: string) => ({ tag })),
+          create: parsedTags.map((tag: string) => ({ tag })),
         },
         techStack: {
-          create: (tech ?? []).map((t: string) => ({ techName: t })),
+          create: parsedTech.map((t: string) => ({ techName: t })),
         },
       },
       include: {
@@ -84,6 +96,7 @@ export async function PUT(
     return NextResponse.json({ error: "Failed to update project" }, { status: 500 });
   }
 }
+
 
 export async function DELETE(
   _req: NextRequest,

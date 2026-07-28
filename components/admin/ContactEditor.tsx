@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 type ContactLocale = {
   locale: string;
@@ -62,7 +63,6 @@ export default function ContactEditor() {
   const [links, setLinks] = useState<ContactLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     fetch("/api/admin/contact")
@@ -122,9 +122,8 @@ export default function ContactEditor() {
 
   const handleSave = async () => {
     setSaving(true);
-    setSaved(false);
     try {
-      await fetch("/api/admin/contact", {
+      const res = await fetch("/api/admin/contact", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -132,10 +131,11 @@ export default function ContactEditor() {
           links: links.map((l, i) => ({ ...l, sortOrder: i })),
         }),
       });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      if (!res.ok) throw new Error("Save failed");
+      toast.success("Contact Section berhasil disimpan!");
     } catch (e) {
       console.error(e);
+      toast.error("Gagal menyimpan Contact Section!");
     } finally {
       setSaving(false);
     }
@@ -281,11 +281,6 @@ export default function ContactEditor() {
         >
           {saving ? "Saving..." : "Save Contact"}
         </button>
-        {saved && (
-          <span className="font-mono font-bold text-xs uppercase tracking-widest bg-brutal-lime border-3 border-brutal-black px-3 py-1 animate-pulse">
-            Saved!
-          </span>
-        )}
       </div>
     </div>
   );

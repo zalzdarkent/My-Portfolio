@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 interface WorkHabit {
   locale: string;
@@ -47,7 +48,6 @@ export default function SidebarEditor() {
   const [data, setData] = useState<SidebarData>(emptyData);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState("");
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
     workHabits: true,
     snapshotItems: false,
@@ -63,7 +63,7 @@ export default function SidebarEditor() {
         setLoading(false);
       })
       .catch(() => {
-        setMessage("Failed to load sidebar data");
+        toast.error("Gagal memuat data Sidebar");
         setLoading(false);
       });
   }, []);
@@ -158,7 +158,6 @@ export default function SidebarEditor() {
 
   const handleSave = async () => {
     setSaving(true);
-    setMessage("");
     try {
       const res = await fetch("/api/admin/sidebar", {
         method: "PUT",
@@ -168,12 +167,11 @@ export default function SidebarEditor() {
       if (!res.ok) throw new Error("Save failed");
       const saved = await res.json();
       setData(saved);
-      setMessage("All sidebar data saved!");
+      toast.success("Data Sidebar berhasil disimpan!");
     } catch {
-      setMessage("Failed to save");
+      toast.error("Gagal menyimpan data Sidebar!");
     } finally {
       setSaving(false);
-      setTimeout(() => setMessage(""), 2000);
     }
   };
 
@@ -419,12 +417,6 @@ export default function SidebarEditor() {
           </div>
         ))}
       </div>
-
-      {message && (
-        <div className="border-t-4 border-brutal-black p-3 bg-brutal-yellow/30 text-center font-mono text-sm font-bold">
-          {message}
-        </div>
-      )}
     </div>
   );
 }

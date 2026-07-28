@@ -8,6 +8,8 @@ import { SiGmail } from "react-icons/si";
 import { useForm, ValidationError } from "@formspree/react";
 import { useTranslations, useLocale } from "next-intl";
 
+import { toast } from "sonner";
+
 const ICON_MAP: Record<string, any> = { FaGithub, FaLinkedin, SiGmail };
 
 const DEFAULT_LINKS = [
@@ -26,15 +28,13 @@ export default function ContactSection() {
   const ref = useRef<HTMLElement>(null);
   const [state, handleSubmit] = useForm("mwvjbojr");
   const inView = useInView(ref, { once: true, margin: "-80px" });
-  const [toast, setToast] = useState(false);
   const [links, setLinks] = useState(DEFAULT_LINKS);
 
   useEffect(() => {
     if (state.succeeded) {
-      setToast(true);
-      setTimeout(() => setToast(false), 3500);
+      toast.success(t("toast"));
     }
-  }, [state.succeeded]);
+  }, [state.succeeded, t]);
 
   useEffect(() => {
     fetch("/api/admin/contact")
@@ -149,21 +149,6 @@ export default function ContactSection() {
         </div>
       </section>
 
-      {/* Toast */}
-      <AnimatePresence>
-        {toast && (
-          <motion.div
-            key="toast"
-            initial={{ y: 80, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 80, opacity: 0 }}
-            transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="fixed bottom-6 right-6 z-50 bg-brutal-black text-brutal-yellow border-4 border-brutal-black shadow-brutal px-6 py-4 font-body font-bold text-sm"
-          >
-            {t("toast")}
-          </motion.div>
-        )}
-      </AnimatePresence>
     </>
   );
 }

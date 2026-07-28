@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 
 type MarqueeItem = {
   text: string;
@@ -11,7 +12,6 @@ export default function MarqueeEditor() {
   const [items, setItems] = useState<MarqueeItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     fetch("/api/admin/marquee")
@@ -61,21 +61,21 @@ export default function MarqueeEditor() {
 
   const handleSave = async () => {
     setSaving(true);
-    setSaved(false);
     try {
       const sorted = [...items]
         .sort((a, b) => a.sortOrder - b.sortOrder)
         .map((item, i) => ({ ...item, sortOrder: i }));
-      await fetch("/api/admin/marquee", {
+      const res = await fetch("/api/admin/marquee", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ items: sorted }),
       });
+      if (!res.ok) throw new Error("Save failed");
       setItems(sorted);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      toast.success("Marquee Items berhasil disimpan!");
     } catch (e) {
       console.error(e);
+      toast.error("Gagal menyimpan Marquee Items!");
     } finally {
       setSaving(false);
     }
@@ -181,11 +181,6 @@ export default function MarqueeEditor() {
         >
           {saving ? "Saving..." : "Save Marquee"}
         </button>
-        {saved && (
-          <span className="font-mono font-bold text-xs uppercase tracking-widest bg-brutal-lime border-3 border-brutal-black px-3 py-1 animate-pulse">
-            Saved!
-          </span>
-        )}
       </div>
     </div>
   );

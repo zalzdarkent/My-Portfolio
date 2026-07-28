@@ -48,7 +48,8 @@
     "title": "Projects",
     "modal": {
       "techLabel": "Technologies Used",
-      "featuresLabel": "Feature Highlights"
+      "featuresLabel": "Feature Highlights",
+      "viewFull": "View Full Details"
     },
     "detailBtn": "Detail →",
     "filter": {

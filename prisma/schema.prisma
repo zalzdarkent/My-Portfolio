@@ -58,6 +58,7 @@ model AboutContent {
 model Project {
   id        Int      @id @default(autoincrement())
   image     String   @default("")
+  images    String   @default("[]") // JSON array of image URLs for slider
   githubUrl String   @default("") @map("github_url")
   liveUrl   String   @default("") @map("live_url")
   sortOrder Int      @default(0) @map("sort_order")

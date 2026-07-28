@@ -50,6 +50,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { Toaster } from "@/components/Toaster";
+
 export default function RootLayout({
   children,
 }: {
@@ -61,6 +63,7 @@ export default function RootLayout({
     >
       <body className="bg-brutal-white antialiased text-brutal-black">
         {children}
+        <Toaster />
       </body>
     </html>
   );

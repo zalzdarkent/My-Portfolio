@@ -132,7 +132,8 @@
     },
     "modal": {
       "techLabel": "Teknologi yang Digunakan",
-      "featuresLabel": "Highlight Fitur"
+      "featuresLabel": "Highlight Fitur",
+      "viewFull": "Lihat Detail Lengkap"
     }
   },
   "experience": {

@@ -6,6 +6,7 @@ export interface Project {
   id: number;
   tags: Tag[];
   image: string;
+  images?: string[];
   tech: string[];
   github: string;
   live: string;

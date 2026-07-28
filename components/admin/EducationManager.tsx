@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 interface EducationHighlight {
   text: string;
@@ -24,7 +25,6 @@ export default function EducationManager() {
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<number | string | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [message, setMessage] = useState("");
 
   useEffect(() => {
     fetch("/api/admin/education")
@@ -34,7 +34,7 @@ export default function EducationManager() {
         setLoading(false);
       })
       .catch(() => {
-        setMessage("Failed to load education");
+        toast.error("Gagal memuat Education");
         setLoading(false);
       });
   }, []);
@@ -97,7 +97,6 @@ export default function EducationManager() {
     const entry = entries[index];
     const isNew = entry._isNew;
     setSavingId(entry.id ?? "new-" + index);
-    setMessage("");
 
     const payload = {
       locale: entry.locale,
@@ -121,12 +120,11 @@ export default function EducationManager() {
       setEntries((prev) =>
         prev.map((e, i) => (i === index ? { ...saved, _isNew: false, _expanded: true } : e))
       );
-      setMessage(isNew ? "Created!" : "Updated!");
+      toast.success(isNew ? "Education baru berhasil dibuat!" : "Education berhasil diperbarui!");
     } catch {
-      setMessage("Failed to save");
+      toast.error("Gagal menyimpan Education!");
     } finally {
       setSavingId(null);
-      setTimeout(() => setMessage(""), 2000);
     }
   };
 
@@ -136,19 +134,18 @@ export default function EducationManager() {
       setEntries((prev) => prev.filter((_, i) => i !== index));
       return;
     }
-    if (!confirm("Delete this education entry?")) return;
+    if (!confirm("Hapus entri Education ini?")) return;
 
     setDeletingId(entry.id);
     try {
       const res = await fetch(`/api/admin/education/${entry.id}`, { method: "DELETE" });
       if (!res.ok) throw new Error("Delete failed");
       setEntries((prev) => prev.filter((_, i) => i !== index));
-      setMessage("Deleted!");
+      toast.success("Education berhasil dihapus!");
     } catch {
-      setMessage("Failed to delete");
+      toast.error("Gagal menghapus Education!");
     } finally {
       setDeletingId(null);
-      setTimeout(() => setMessage(""), 2000);
     }
   };
 
@@ -306,12 +303,6 @@ export default function EducationManager() {
       {entries.length === 0 && (
         <div className="p-6 text-center font-mono text-brutal-black/50">
           No education entries yet. Click + Add Education to begin.
-        </div>
-      )}
-
-      {message && (
-        <div className="border-t-4 border-brutal-black p-3 bg-brutal-yellow/30 text-center font-mono text-sm font-bold">
-          {message}
         </div>
       )}
     </div>

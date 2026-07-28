@@ -3,45 +3,20 @@
 import { useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Project } from "@/lib/data";
-import { FaDocker, FaLaravel, FaPython, FaReact, FaPhp } from "react-icons/fa6";
-import { SiInertia, SiMysql, SiOpencv, SiShadcnui, SiTailwindcss, SiYolo, SiFlask, SiOnnx, SiVite, SiBootstrap, SiJquery, SiJavascript, SiPostgresql } from "react-icons/si";
+import { useLocale } from "next-intl";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { DiMsqlServer } from "react-icons/di";
+import { matchTechSkill } from "@/lib/techHelper";
+import TechIcon from "@/components/TechIcon";
 
 interface ProjectModalProps {
   project: Project | null;
   onClose: () => void;
 }
 
-const techIconMap: Record<string, { icon: any; bg: string; text: string }> = {
-  // web
-  "Laravel": { icon: FaLaravel, bg: "#FF2D20", text: "#FFFFFF" },
-  "React": { icon: FaReact, bg: "#20232A", text: "#61DAFB" },
-  "Inertia.js": { icon: SiInertia, bg: "#9553E9", text: "#FFFFFF" },
-  "Tailwind CSS": { icon: SiTailwindcss, bg: "#06B6D4", text: "#FFFFFF" },
-  "Shadcn": { icon: SiShadcnui, bg: "#000000", text: "#FFFFFF" },
-  "MySQL": { icon: SiMysql, bg: "#00758F", text: "#F29111" },
-  "Docker": { icon: FaDocker, bg: "#2496ED", text: "#FFFFFF" },
-  "Vite": { icon: SiVite, bg: "#FFFFFF", text: "#db12ee" },
-  "PHP": { icon: FaPhp, bg: "#777BB4", text: "#FFFFFF" },
-  "SQLSRV": { icon: DiMsqlServer, bg: "#CC2927", text: "#FFFFFF" },
-  "Bootstrap": { icon: SiBootstrap, bg: "#7952B3", text: "#FFFFFF" },
-  "Jquery": { icon: SiJquery, bg: "#0769AD", text: "#FFFFFF" },
-  "Javascript": { icon: SiJavascript, bg: "#F7DF1E", text: "#000000" },
-
-  // ai/ml
-  "Python": { icon: FaPython, bg: "#FFFFF", text: "#3776AB" },
-  "OpenCV": { icon: SiOpencv, bg: "#FFFFFF", text: "#5C3EE8" },
-  "Yolo": { icon: SiYolo, bg: "#FFFFF", text: "#005CED" },
-  "Flask": { icon: SiFlask, bg: "#000000", text: "#FFFFFF" },
-  "ONNX": { icon: SiOnnx, bg: "#005CED", text: "#FFFFFF" },
-
-  // iot
-  "postgreSQL": { icon: SiPostgresql, bg: "#336791", text: "#FFFFFF" },
-};
-
 export default function ProjectModal({ project, onClose }: ProjectModalProps) {
   const t = useTranslations("projects");
+  const locale = useLocale();
   // Lock scroll
   useEffect(() => {
     if (project) {
@@ -117,10 +92,15 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {project.tech.map((techName: string, index: number) => {
-                    const techConfig = techIconMap[techName];
-                    if (!techConfig) return null;
-
-                    const IconComponent = techConfig.icon;
+                    const matched = matchTechSkill(techName);
+                    const iconName = matched.iconName || techName;
+                    const bg = matched.color || "#FDE047";
+                    const isLightBg =
+                      bg === "#FFFFFF" ||
+                      bg === "#F7DF1E" ||
+                      bg.toLowerCase() === "#ffffff" ||
+                      bg === "#fde047";
+                    const textColor = isLightBg ? "#000000" : "#FFFFFF";
 
                     return (
                       <div
@@ -130,11 +110,11 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                         <span
                           className="flex items-center justify-center p-2 border-3 border-black shadow-brutal-sm transition-transform hover:-translate-y-0.5"
                           style={{
-                            background: techConfig.bg,
-                            color: techConfig.text,
+                            backgroundColor: bg,
+                            color: textColor,
                           }}
                         >
-                          <IconComponent size={18} />
+                          <TechIcon name={iconName} className="w-4.5 h-4.5" />
                         </span>
 
                         {/* Neo Brutalist Tooltip */}
@@ -200,13 +180,24 @@ export default function ProjectModal({ project, onClose }: ProjectModalProps) {
                   {t("modal.featuresLabel")}
                 </p>
                 <ul className="space-y-2">
-                  {(project.features ?? []).map((f, i) => (
+                  {(project.features ?? []).map((f: string, i: number) => (
                     <li key={i} className="flex items-start gap-2 font-body text-sm">
                       <span className="text-brutal-orange font-bold mt-0.5">✦</span>
                       {f}
                     </li>
                   ))}
                 </ul>
+              </div>
+
+              {/* View Full Page Link */}
+              <div className="text-center">
+                <Link
+                  href={`/${locale}/projects/${project.id}`}
+                  onClick={onClose}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-brutal-yellow border-3 border-brutal-black shadow-brutal-sm font-body font-bold text-sm uppercase tracking-wide transition-all hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none active:translate-x-1 active:translate-y-1"
+                >
+                  {t("modal.viewFull")} →
+                </Link>
               </div>
 
               {/* Links */}
