@@ -14,9 +14,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-.agents
-.claude
-.windsurf
+/.agents/
+/.claude/
+/.windsurf/
 
 
 # Local environment variables (SANGAT PENTING: biar API Key / DB password ga bocor ke GitHub)
