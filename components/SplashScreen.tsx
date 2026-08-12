@@ -165,22 +165,6 @@ export default function SplashScreen({
         style={{ x: springX, y: springY }}
       />
 
-      <div
-        aria-hidden
-        className="absolute inset-0 opacity-[0.08]"
-        style={{
-          backgroundImage:
-            `repeating-linear-gradient(
-                45deg,
-                #000,
-                #000 1px,
-                transparent 1px,
-                transparent 8px
-            )`,
-          backgroundSize: "96px 96px",
-        }}
-      />
-
       {floatingElements.map((el, idx) => (
         <FloatingShape key={el.id} element={el} constraintsRef={constraintsRef} index={idx} />
       ))}
